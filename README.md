@@ -49,6 +49,14 @@ ikke selve komponenten. I Pulumi gjør man det med package.json, i Terraform bru
 
 Nytt verktøy, feks `ok`.
 
+Installer med
+
+```sh
+brew tap oslokommune/ok-cli
+brew install oslokommune/ok-cli/ok
+```
+
+
 ```shell
 . ok sso login
 # eller
