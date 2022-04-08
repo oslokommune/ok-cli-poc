@@ -19,7 +19,7 @@ if [[ $1 == "venv" ]]; then
     AWS_ACCOUNT_ID=`yq .aws.accountID $ENV_FILE`
 
     echo 1>&2
-    echo Configuring AWS profile $AWS_PROFILE 1>&2
+    echo Configuring AWS profile $AWS_PROFILE for account $AWS_ACCOUNT_ID 1>&2
 
     aws configure set --profile $AWS_PROFILE sso_start_url https://d-936709095d.awsapps.com/start
     aws configure set --profile $AWS_PROFILE sso_region eu-west-1
@@ -29,10 +29,16 @@ if [[ $1 == "venv" ]]; then
     aws configure set --profile $AWS_PROFILE output json
 
     echo 1>&2
-    echo Logging into AWS SSO 1>&2
+    echo Logging into AWS: 1>&2
     echo 1>&2
 
     aws sso login --profile $AWS_PROFILE 1>&2
+
+    echo 1>&2
+    echo Tip: Source the output of this command to set the AWS and Terraform environment variables in your current shell: 1>&2
+    echo 1>&2
+    echo "    . <($0 $@)" 1>&2
+    echo 1>&2
 
     echo export AWS_PROFILE=$AWS_PROFILE
     echo export AWS_REGION=$AWS_REGION
