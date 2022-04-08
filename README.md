@@ -58,9 +58,9 @@ brew install oslokommune/ok-cli/ok
 
 
 ```shell
-. ok sso login
+. <(ok sso login)
 # eller
-. ok venv -c env-dev.yaml
+. <(ok venv -e env-dev.yaml)
 
 ok ecs scaffold cluster
 ok ecs scaffold service
@@ -77,8 +77,8 @@ ok version
 . <(ok sso login) # Se forslag til implementasjon i sso-login.md
 
 # Logge inn til miljø, alternativ 2:
-. <(ok venv -c env-dev.yaml) # 
-. <(ok venv -c env-dev.yaml --terminal fish)
+. <(ok venv -e env-dev.yaml) #
+. <(ok venv -e env-dev.yaml --terminal fish)
 
 ok ecs scaffold cluster
 ok ecs scaffold service

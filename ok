@@ -1,7 +1,22 @@
 #!/usr/bin/env bash
 
 if [[ $1 == "venv" ]]; then
-    echo export TF_VAR_something=
+    if [[ $2 == "-e" || $2 == "--environment" ]]; then
+        ENV_FILE=$3
+    else
+        ENV_FILE=env.yml
+    fi
+
+    if [[ ! -f $ENV_FILE ]]; then
+        echo Environment file $ENV_FILE not found
+        exit 1
+    fi
+
+    echo export AWS_PROFILE=`yq .metadata.aws.profile $ENV_FILE`
+    echo export AWS_REGION=`yq .metadata.aws.region $ENV_FILE`
+
+    echo export TF_VAR_region=$AWS_REGION
+    echo export TF_VAR_project=`yq .metadata.project $ENV_FILE`
 fi
 
 if [[ $1 == "init" ]]; then
