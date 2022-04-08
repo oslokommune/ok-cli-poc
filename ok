@@ -12,8 +12,8 @@ if [[ $1 == "venv" ]]; then
         exit 1
     fi
 
-    echo export AWS_PROFILE=`yq .metadata.aws.profile $ENV_FILE`
-    echo export AWS_REGION=`yq .metadata.aws.region $ENV_FILE`
+    echo export AWS_PROFILE=`yq .aws.profile $ENV_FILE`
+    echo export AWS_REGION=`yq .aws.region $ENV_FILE`
 
     echo export TF_VAR_region=$AWS_REGION
     echo export TF_VAR_project=`yq .metadata.project $ENV_FILE`
