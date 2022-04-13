@@ -1,6 +1,62 @@
-# okctl iterasjon 2
+# ok CLI
 
-## Løsningsforslag
+Improves the UX when working with AWS and Terraform/Pulumi environments. 
+
+## Installation
+
+* Git clone this repo. Add it to your PATH.
+
+TODO: Put in apt and brew.
+
+* If you use Bash or Zsh, add to ~/.bash_aliases or ~/.zshrc:
+
+```bash
+# Helper function to log in to OK environment
+function okl() {
+    if [[ -z $1 ]]; then
+        ok venv -e
+    else
+        . <(ok venv -e $1)
+    fi
+}
+```
+
+* If you use Fish, add to `~/.config/fish/config.fish`
+
+```shell
+function okl --description "Log in to OK environment"
+    if test -z $argv[1]
+        ok venv -e
+    else
+        set OUT (ok venv -e $argv)
+        echo $OUT | source
+    end
+end
+```
+
+## Usage
+
+```shell
+
+cat <<EOF>env-dev.yaml
+apiVersion: ok.env/v1
+kind: Environment
+
+metadata:
+  project: 'ok-cli-poc'
+
+aws:
+  profile: 'ok-cli-poc-dev'
+  accountID: '123456789012'
+  region: 'eu-west-1'
+EOF
+
+okl env-dev.yaml # This will log in to the environment
+```
+
+Specifically, it sets up environment variables to be used by AWS and Terraform.
+
+# okctl iterasjon 2 - Løsningsforslag
 
 * Alternativ 1: Lage nytt CLI (`ok`?) som
   * funker som et samlested for hjelpescripts

@@ -3,12 +3,17 @@
 if [[ $1 == "venv" ]]; then
     if [[ $2 == "-e" || $2 == "--environment" ]]; then
         ENV_FILE=$3
+
+        if [[ -z $ENV_FILE ]]; then
+          echo Missing environment file. USAGE: venv -e env-file.yaml
+          exit 1
+        fi
     else
         ENV_FILE=env.yml
     fi
 
     if [[ ! -f $ENV_FILE ]]; then
-        echo Environment file $ENV_FILE not found
+        echo Environment file not found $ENV_FILE
         exit 1
     fi
 
