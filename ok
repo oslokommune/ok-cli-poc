@@ -5,7 +5,9 @@ if [[ $1 == "venv" ]]; then
         ENV_FILE=$3
 
         if [[ -z $ENV_FILE ]]; then
-          echo Missing environment file. USAGE: venv -e env-file.yaml
+          echo Missing environment file.
+          echo
+          echo USAGE: venv -e env-file.yaml
           exit 1
         fi
     else
@@ -26,12 +28,12 @@ if [[ $1 == "venv" ]]; then
     echo 1>&2
     echo Configuring AWS profile $AWS_PROFILE for account $AWS_ACCOUNT_ID 1>&2
 
-    aws configure set --profile $AWS_PROFILE sso_start_url https://d-936709095d.awsapps.com/start
-    aws configure set --profile $AWS_PROFILE sso_region eu-west-1
-    aws configure set --profile $AWS_PROFILE sso_account_id $AWS_ACCOUNT_ID
-    aws configure set --profile $AWS_PROFILE sso_role_name AWSAdministratorAccess
-    aws configure set --profile $AWS_PROFILE region $AWS_REGION
-    aws configure set --profile $AWS_PROFILE output json
+    aws configure set --profile $AWS_PROFILE sso_start_url https://d-936709095d.awsapps.com/start >&2
+    aws configure set --profile $AWS_PROFILE sso_region eu-west-1 >&2
+    aws configure set --profile $AWS_PROFILE sso_account_id $AWS_ACCOUNT_ID >&2
+    aws configure set --profile $AWS_PROFILE sso_role_name AWSAdministratorAccess >&2
+    aws configure set --profile $AWS_PROFILE region $AWS_REGION >&2
+    aws configure set --profile $AWS_PROFILE output json >&2
 
     echo 1>&2
     echo Logging into AWS: 1>&2
@@ -45,17 +47,36 @@ if [[ $1 == "venv" ]]; then
     echo "    . <($0 $@)" 1>&2
     echo 1>&2
 
-    echo export AWS_PROFILE=$AWS_PROFILE
-    echo export AWS_REGION=$AWS_REGION
+    TF_VAR_project=$(yq .metadata.project $ENV_FILE)
 
-    echo export TF_VAR_region=$AWS_REGION
-    echo export TF_VAR_project=`yq .metadata.project $ENV_FILE`
+    echo Setting:
+
+    echo AWS_PROFILE=$AWS_PROFILE 1>&2
+    echo AWS_REGION=$AWS_REGION 1>&2
+
+    echo TF_VAR_region=$AWS_REGION 1>&2
+    echo TF_VAR_project=$TF_VAR_project 1>&2
+
+    # exports
+
+    if [[ ! -z $IS_FISH_SOURCED ]]; then
+        echo set -g AWS_PROFILE $AWS_PROFILE
+        echo set -g AWS_REGION $AWS_REGION
+
+        echo set -g TF_VAR_region $AWS_REGION
+        echo set -g TF_VAR_project $TF_VAR_project
+    else
+        echo export AWS_PROFILE=$AWS_PROFILE
+        echo export AWS_REGION=$AWS_REGION
+
+        echo export TF_VAR_region=$AWS_REGION
+        echo export TF_VAR_project=$TF_VAR_project
+    fi
 fi
 
 if [[ $1 == "init" ]]; then
     echo Some init
 fi
-
 
 if [[ $1 == "sso" ]]; then
     echo Some SSO
