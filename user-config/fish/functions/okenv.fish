@@ -1,3 +1,3 @@
 function okenv
-    fs ok venv -e $argv
+    fs ok venv -f $argv
 end

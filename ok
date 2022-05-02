@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 if [[ $1 == "venv" ]]; then
-    if [[ $2 == "-e" || $2 == "--environment" ]]; then
+    if [[ $2 == "-f" || $2 == "--file" ]]; then
         ENV_FILE=$3
 
         if [[ -z $ENV_FILE ]]; then
           echo Missing environment file.
           echo
-          echo USAGE: venv -e env-file.yaml
+          echo USAGE: venv -f env-file.yaml
           exit 1
         fi
     else
@@ -28,6 +28,7 @@ if [[ $1 == "venv" ]]; then
     echo 1>&2
     echo Configuring AWS profile $AWS_PROFILE for account $AWS_ACCOUNT_ID 1>&2
 
+    # Run AWS configuration and login
     aws configure set --profile $AWS_PROFILE sso_start_url https://d-936709095d.awsapps.com/start >&2
     aws configure set --profile $AWS_PROFILE sso_region eu-west-1 >&2
     aws configure set --profile $AWS_PROFILE sso_account_id $AWS_ACCOUNT_ID >&2
@@ -42,35 +43,63 @@ if [[ $1 == "venv" ]]; then
     aws sso login --profile $AWS_PROFILE 1>&2
 
     echo 1>&2
-    echo Tip: Source the output of this command to set the AWS and Terraform environment variables in your current shell: 1>&2
-    echo 1>&2
-    echo "    . <($0 $@)" 1>&2
-    echo 1>&2
 
+    # Output settings
     TF_VAR_project=$(yq .metadata.project $ENV_FILE)
 
-    echo Setting:
+    [[ "${BASH_SOURCE[0]}" != "${0}" ]] && IS_SOURCED=true
 
-    echo AWS_PROFILE=$AWS_PROFILE 1>&2
-    echo AWS_REGION=$AWS_REGION 1>&2
+    if [[ ! -z $YK_FISH_EXISTS ]]; then
+        # User is using Fish
+        if [[ -z ${IS_FISH_SOURCED} ]]; then
+            echo "Tip: Source the output of this command to set the AWS and Terraform environment variables in your current shell:" 1>&2
+            echo 1>&2
+            echo "    okenv $@" 1>&2
+        else
+            # User is running this command with the source prefix 'fs'
+            # Note to self: If shebang is fish, we must use "echo set -x AWS_PROFILE $AWS_PROFILE" here.
 
-    echo TF_VAR_region=$AWS_REGION 1>&2
-    echo TF_VAR_project=$TF_VAR_project 1>&2
+            echo export AWS_PROFILE=$AWS_PROFILE
+            echo export AWS_REGION=$AWS_REGION
 
-    # exports
+            echo export TF_VAR_region=$AWS_REGION
+            echo export TF_VAR_project=$TF_VAR_project
+        fi
+        
+        echo 1>&2
+        echo set -x AWS_PROFILE $AWS_PROFILE 1>&2
+        echo set -x AWS_REGION $AWS_REGION 1>&2
 
-    if [[ ! -z $IS_FISH_SOURCED ]]; then
-        echo set -g AWS_PROFILE $AWS_PROFILE
-        echo set -g AWS_REGION $AWS_REGION
+        echo set -x TF_VAR_region $AWS_REGION 1>&2
+        echo set -x TF_VAR_project $TF_VAR_project 1>&2
+        echo 1>&2
+    elif [[ ! -z ${BASH_VERSION} ]]; then
 
-        echo set -g TF_VAR_region $AWS_REGION
-        echo set -g TF_VAR_project $TF_VAR_project
-    else
+        # Using is using Bash
+        [[ "${BASH_SOURCE[0]}" != "${0}" ]] && IS_SOURCED=true
+
+        if [[ ! $IS_SOURCED == "true" ]]; then
+            ME=$(basename $0)
+
+            echo 1>&2
+            echo "Tip: Source the output of this command to set the AWS and Terraform environment variables in your current shell:" 1>&2
+            echo 1>&2
+
+            echo "    . $ME $@" 1>&2
+            echo 1>&2
+        fi
+
+        echo 1>&2
         echo export AWS_PROFILE=$AWS_PROFILE
         echo export AWS_REGION=$AWS_REGION
 
         echo export TF_VAR_region=$AWS_REGION
         echo export TF_VAR_project=$TF_VAR_project
+        echo 1>&2
+    else
+        echo "Terminal is not supported, so you will have to set this environment variable manually:"
+        echo AWS_PROFILE="$PROFILE"
+        echo 1>&2
     fi
 fi
 

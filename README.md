@@ -8,20 +8,9 @@ Improves the UX when working with AWS and Terraform/Pulumi environments.
 
 TODO: Put in apt and brew.
 
-* If you use Bash or Zsh, add to ~/.bash_aliases or ~/.zshrc:
-
-```bash
-# Helper function to log in to OK environment
-function okl() {
-    if [[ -z $1 ]]; then
-        ok venv -e
-    else
-        . <(ok venv -e $1)
-    fi
-}
-```
-
-* If you use Fish, add to `~/.config/fish/config.fish`
+* If you use Bash or Zsh, add [user-config/bash/okenv](user-config/bash/okenv) to `~/.bash_aliase` or
+`~/.zshrc 
+* If you use Fish, copy files in [user-config/fish](user-config/fish) to `~/.config/.fish`.
 
 ```shell
 function okl --description "Log in to OK environment"
