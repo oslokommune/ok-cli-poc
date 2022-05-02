@@ -21,15 +21,16 @@ if [[ $1 == "venv" ]]; then
 
     echo Reading environment config from $ENV_FILE 1>&2
 
+    OK_ENV=`yq .metadata.env $ENV_FILE`
+    AWS_ACCOUNT_ID=`yq .aws.accountID $ENV_FILE`
     AWS_PROFILE=`yq .aws.profile $ENV_FILE`
     AWS_REGION=`yq .aws.region $ENV_FILE`
-    AWS_ACCOUNT_ID=`yq .aws.accountID $ENV_FILE`
 
     echo 1>&2
     echo Configuring AWS profile $AWS_PROFILE for account $AWS_ACCOUNT_ID 1>&2
 
     # Run AWS configuration and login
-    aws configure set --profile $AWS_PROFILE sso_start_url https://d-936709095d.awsapps.com/start >&2
+    aws configure set --profile $AWS_PROFILE sso_start_url https://osloorigo.awsapps.com/start >&2
     aws configure set --profile $AWS_PROFILE sso_region eu-west-1 >&2
     aws configure set --profile $AWS_PROFILE sso_account_id $AWS_ACCOUNT_ID >&2
     aws configure set --profile $AWS_PROFILE sso_role_name AWSAdministratorAccess >&2
@@ -45,9 +46,7 @@ if [[ $1 == "venv" ]]; then
     echo 1>&2
 
     # Output settings
-    TF_VAR_project=$(yq .metadata.project $ENV_FILE)
-
-    [[ "${BASH_SOURCE[0]}" != "${0}" ]] && IS_SOURCED=true
+    PROJECT_NAME=$(yq .metadata.project $ENV_FILE)
 
     if [[ ! -z $YK_FISH_EXISTS ]]; then
         # User is using Fish
@@ -62,21 +61,23 @@ if [[ $1 == "venv" ]]; then
             echo export AWS_PROFILE=$AWS_PROFILE
             echo export AWS_REGION=$AWS_REGION
 
+            echo export TF_VAR_env=$OK_ENV
             echo export TF_VAR_region=$AWS_REGION
-            echo export TF_VAR_project=$TF_VAR_project
+            echo export TF_VAR_project=$PROJECT_NAME
         fi
         
         echo 1>&2
         echo set -x AWS_PROFILE $AWS_PROFILE 1>&2
         echo set -x AWS_REGION $AWS_REGION 1>&2
 
+        echo set -x TF_VAR_env $OK_ENV 1>&2
         echo set -x TF_VAR_region $AWS_REGION 1>&2
-        echo set -x TF_VAR_project $TF_VAR_project 1>&2
+        echo set -x TF_VAR_project $PROJECT_NAME 1>&2
         echo 1>&2
-    elif [[ ! -z ${BASH_VERSION} ]]; then
+    elif [[ ! -z ${BASH_VERSION} || ! -z ${ZSH_VERSION} ]]; then
+        # User is using Bash or Zsh
 
-        # Using is using Bash
-        [[ "${BASH_SOURCE[0]}" != "${0}" ]] && IS_SOURCED=true
+        [[ "${BASH_SOURCE[0]}" != "${0}" || $ZSH_EVAL_CONTEXT =~ :file$ ]] && IS_SOURCED=true
 
         if [[ ! $IS_SOURCED == "true" ]]; then
             ME=$(basename $0)
@@ -93,12 +94,13 @@ if [[ $1 == "venv" ]]; then
         echo export AWS_PROFILE=$AWS_PROFILE
         echo export AWS_REGION=$AWS_REGION
 
+        echo export TF_VAR_env=$OK_ENV
         echo export TF_VAR_region=$AWS_REGION
-        echo export TF_VAR_project=$TF_VAR_project
+        echo export TF_VAR_project=$PROJECT_NAME
         echo 1>&2
     else
         echo "Terminal is not supported, so you will have to set this environment variable manually:"
-        echo AWS_PROFILE="$PROFILE"
+        echo AWS_PROFILE="$AWS_PROFILE"
         echo 1>&2
     fi
 fi
