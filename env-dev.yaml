@@ -3,7 +3,6 @@ kind: Environment
 
 metadata:
   project: 'ok-cli-poc'
-  env: 'dev'
 
 aws:
   profile: 'ok-cli-poc-dev'

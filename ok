@@ -11,6 +11,7 @@ if [[ $1 == "venv" ]]; then
           exit 1
         fi
     else
+        echo No file specified, using env.yaml
         ENV_FILE=env.yml
     fi
 
@@ -21,7 +22,6 @@ if [[ $1 == "venv" ]]; then
 
     echo Reading environment config from $ENV_FILE 1>&2
 
-    OK_ENV=`yq .metadata.env $ENV_FILE`
     AWS_ACCOUNT_ID=`yq .aws.accountID $ENV_FILE`
     AWS_PROFILE=`yq .aws.profile $ENV_FILE`
     AWS_REGION=`yq .aws.region $ENV_FILE`
@@ -61,18 +61,16 @@ if [[ $1 == "venv" ]]; then
             echo export AWS_PROFILE=$AWS_PROFILE
             echo export AWS_REGION=$AWS_REGION
 
-            echo export TF_VAR_env=$OK_ENV
             echo export TF_VAR_region=$AWS_REGION
-            echo export TF_VAR_project=$PROJECT_NAME
+            echo export TF_VAR_project_name=$PROJECT_NAME
         fi
         
         echo 1>&2
         echo set -x AWS_PROFILE $AWS_PROFILE 1>&2
         echo set -x AWS_REGION $AWS_REGION 1>&2
 
-        echo set -x TF_VAR_env $OK_ENV 1>&2
         echo set -x TF_VAR_region $AWS_REGION 1>&2
-        echo set -x TF_VAR_project $PROJECT_NAME 1>&2
+        echo set -x TF_VAR_project_name $PROJECT_NAME 1>&2
         echo 1>&2
     elif [[ ! -z ${BASH_VERSION} || ! -z ${ZSH_VERSION} ]]; then
         # User is using Bash or Zsh
@@ -94,9 +92,8 @@ if [[ $1 == "venv" ]]; then
         echo export AWS_PROFILE=$AWS_PROFILE
         echo export AWS_REGION=$AWS_REGION
 
-        echo export TF_VAR_env=$OK_ENV
         echo export TF_VAR_region=$AWS_REGION
-        echo export TF_VAR_project=$PROJECT_NAME
+        echo export TF_VAR_project_name=$PROJECT_NAME
         echo 1>&2
     else
         echo "Terminal is not supported, so you will have to set this environment variable manually:"
