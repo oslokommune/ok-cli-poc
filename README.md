@@ -5,54 +5,20 @@ Improves the UX when working with AWS and Terraform/Pulumi environments.
 ## Installation
 
 * Git clone this repo. Add it to your PATH.
-
-TODO: Put in apt and brew.
-
-* If you use Bash or Zsh, add [user-config/bash/okenv](user-config/bash/okenv) to `~/.bash_aliase` or
-`~/.zshrc 
 * If you use Fish, copy files in [user-config/fish](user-config/fish) to `~/.config/.fish`.
-
-```shell
-function okl --description "Log in to OK environment"
-    if test -z $argv[1]
-        ok venv -e
-    else
-        set OUT (ok venv -e $argv)
-        echo $OUT | source
-    end
-end
-```
 
 ## Usage
 
+* Download [env-dev.yaml](env-dev.yaml).
+* Run
+
 ```shell
-
-cat <<EOF>env-dev.yaml
-apiVersion: ok.env/v1
-kind: Environment
-
-metadata:
-  project: 'ok-cli-poc'
-
-aws:
-  profile: 'ok-cli-poc-dev'
-  accountID: '123456789012'
-  region: 'eu-west-1'
-EOF
-
-okl env-dev.yaml # This will log in to the environment
+. ok venv -f env-dev.yaml
 ```
 
-Specifically, it sets up environment variables to be used by AWS and Terraform.
+This sets up environment variables to be used by AWS and the Terraform setup defined in https://github.com/oslokommune/okctl-iac-poc.
 
-# okctl iterasjon 2 - Løsningsforslag
-
-* Alternativ 1: Lage nytt CLI (`ok`?) som
-  * funker som et samlested for hjelpescripts
-  * feks produserer Terraform / Pulumi hvor brukeren selv kjører `tf apply` / `pl up`.
-  * På sikt fase ut `okctl`.
-* Alternativ 2: Implementere alternativ 1 inn i Okctl.
-  * På sikt fase ut apply / delete cluster (for EKS).
+# Wildnotes
 
 ## Prinsipper / Tanker for et CLI-verktøy
 
@@ -83,14 +49,10 @@ NB! Poenget her er å samle script i ett verktøy (`i`), ikke selve kommandoene.
 - Vurder: Go kan være overkill og slitsomt for enkle scripts, det hadde vært fint om vi kunne bruke Bash der det ga mening, og Go for alt
   utover det. Hvis Okctl kunne forwardet til enkle Bash scripts er det også lettere for andre utviklere å bidra. (Implementasjon: Okctl kan feks klone et bash-scripts repo. `okctl somecommand` kan forwarde til `scriptsrepo/somecommand`.) Men tygg litt på denne, vi ønsker _ikke_ kompliserte scripts, da er Go og typede språk bedre.
   
-
-
-    
 Kommandoen laster ned github.com/oslokommune/okctl/pulumi/ecs/cluster, som er -bruk- av en ecs komponent (tilsvarer TF modul),
 ikke selve komponenten. I Pulumi gjør man det med package.json, i Terraform bruker referer man til en modul med versjon i GitHub.
 
-
-## Implementasjon alternativ 1
+## Tanker om implementasjon
 
 Nytt verktøy, feks `ok`.
 
@@ -151,28 +113,6 @@ pl preview
 pl up
 ```
 
-## Implementasjon alternativ 2
+# Todo
 
-* Dagens EKS-spesifikke kommandoer flyttes til `okctl eks`, så f.eks `okctl eks apply cluster`
-* Ikke nødvendig, men foreslår en mer feature basert oppdeling av kommandoer, slik som `aws` CLI-et gjør det (`aws s3 ls`). Eks:
-  `okctl ecs scaffold cluster` framfor `okctl scaffold ecs cluster`. `okctl upgrade` gir feks ikke mening for lambda (ok, kanskje,
-  men poenget er at ikke alle actions passer til alle ressurser), så derfor burde det være
-  `okctl eks upgrade`.
-  
-Eksempelkommandoer:
-
-```sh
-okctl ecs scaffold cluster
-
-# Eksisterende EKS-spesifikke kommandoer flyttes til okctl eks:
-okctl eks apply cluster ...
-okctl eks delete cluster ...
-
-okctl eks apply application ...
-okctl eks upgrade
-okctl eks forward
-
-# Eksisterende generelle kommandoer beholdes
-okctl completion
-okctl version
-```
+* Put `ok` in apt and brew.

@@ -1,5 +1,7 @@
+#!/usr/bin/env fish
+
 # Functions
-function fs --description "source output of script"
+function fs --description "Source output of script (fs = fish source)."
     if test -z $argv[1]
         echo "You need to specify command to execute."
         echo "USAGE: fs <command>"

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# TODO NOT NEEDED, source directly works
-
 function okenv() {
     . ok venv -f $@
 }
