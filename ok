@@ -1,18 +1,27 @@
 #!/usr/bin/env bash
 
+function usage() {
+    echo USAGE: venv -f env-file.yaml
+    echo EXAMPLE: venv -f env-dev.yaml
+}
+
 if [[ $1 == "venv" ]]; then
+    if [[ -z $2 ]]; then
+        usage
+        exit 1
+    fi
+
     if [[ $2 == "-f" || $2 == "--file" ]]; then
         ENV_FILE=$3
 
         if [[ -z $ENV_FILE ]]; then
-          echo Missing environment file.
-          echo
-          echo USAGE: venv -f env-file.yaml
-          exit 1
+            echo Missing environment file.
+            echo
+            usage
+            exit 1
         fi
     else
-        echo No file specified, using env.yaml
-        ENV_FILE=env.yml
+        usage
     fi
 
     if [[ ! -f $ENV_FILE ]]; then
@@ -26,22 +35,24 @@ if [[ $1 == "venv" ]]; then
     AWS_PROFILE=`yq .aws.profile $ENV_FILE`
     AWS_REGION=`yq .aws.region $ENV_FILE`
 
-    echo 1>&2
-    echo Configuring AWS profile $AWS_PROFILE for account $AWS_ACCOUNT_ID 1>&2
+    if [[ $4 != "--skip-config" && $4 != "-s" ]]; then
+        echo 1>&2
+        echo Configuring AWS profile $AWS_PROFILE for account $AWS_ACCOUNT_ID 1>&2
 
-    # Run AWS configuration and login
-    aws configure set --profile $AWS_PROFILE sso_start_url https://osloorigo.awsapps.com/start >&2
-    aws configure set --profile $AWS_PROFILE sso_region eu-west-1 >&2
-    aws configure set --profile $AWS_PROFILE sso_account_id $AWS_ACCOUNT_ID >&2
-    aws configure set --profile $AWS_PROFILE sso_role_name AWSAdministratorAccess >&2
-    aws configure set --profile $AWS_PROFILE region $AWS_REGION >&2
-    aws configure set --profile $AWS_PROFILE output json >&2
+        # Run AWS configuration and login
+        aws configure set --profile $AWS_PROFILE sso_start_url https://osloorigo.awsapps.com/start >&2
+        aws configure set --profile $AWS_PROFILE sso_region eu-west-1 >&2
+        aws configure set --profile $AWS_PROFILE sso_account_id $AWS_ACCOUNT_ID >&2
+        aws configure set --profile $AWS_PROFILE sso_role_name AWSAdministratorAccess >&2
+        aws configure set --profile $AWS_PROFILE region $AWS_REGION >&2
+        aws configure set --profile $AWS_PROFILE output json >&2
 
-    echo 1>&2
-    echo Logging into AWS: 1>&2
-    echo 1>&2
+        echo 1>&2
+        echo Logging into AWS: 1>&2
+        echo 1>&2
 
-    aws sso login --profile $AWS_PROFILE 1>&2
+        aws sso login --profile $AWS_PROFILE 1>&2
+    fi
 
     echo 1>&2
 
